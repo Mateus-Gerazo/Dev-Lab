@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Exemplo CRUD Simples</title>
+    <style>
+        /* Estilos básicos para ficar apresentável */
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            padding: 8px;
+            flex-grow: 1;
+        }
+
+        button {
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+
+        /* Estilo da lista */
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: #f4f4f4;
+            margin-bottom: 5px;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-delete {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            margin-left: 5px;
+        }
+
+        .btn-edit {
+            background: #ffa500;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>CRUD de Usuários</h2>
+
+    <div class="input-group">
+        <input type="text" id="nomeInput" placeholder="Digite um nome...">
+        <button onclick="criarUsuario()">Adicionar</button>
+    </div>
+
+    <ul id="listaUsuarios">
+    </ul>
+
+    <script>
+        // --- ESTADO (BANCO DE DADOS NA MEMÓRIA) ---
+        let usuarios = [];
+        let proximoId = 1;
+
+        // --- CONEXÃO HTML -> JS ---
+        // Pegamos as referências dos elementos da tela para usar no código
+        const inputNome = document.getElementById('nomeInput');
+        const listaTela = document.getElementById('listaUsuarios');
+
+        // --- CREATE (CRIAR) ---
+        function criarUsuario() {
+            const nomeDigitado = inputNome.value; // Pega o texto do input
+
+            if (nomeDigitado === "") {
+                alert("Por favor, digite um nome!");
+                return;
+            }
+
+            const novoUsuario = {
+                id: proximoId++,
+                nome: nomeDigitado
+            };
+
+            usuarios.push(novoUsuario);
+
+            inputNome.value = ""; // Limpa o campo de texto
+            renderizarLista();    // Atualiza a tela (READ)
+        }
+
+        // --- READ (LER / RENDERIZAR) ---
+        // Essa função apaga a lista da tela e desenha tudo de novo baseada no Array
+        function renderizarLista() {
+            listaTela.innerHTML = ""; // Zera o HTML da lista atual
+
+            // Percorre cada usuário do nosso array
+            usuarios.forEach(usuario => {
+                // Cria o HTML de cada linha (li)
+                const li = document.createElement('li');
+
+                // Monta o texto e os botões de ação para este usuário específico
+                li.innerHTML = `
+                    <span>${usuario.nome}</span>
+                    <div>
+                        <button class="btn-edit" onclick="editarUsuario(${usuario.id})">Editar</button>
+                        <button class="btn-delete" onclick="deletarUsuario(${usuario.id})">Excluir</button>
+                    </div>
+                `;
+
+                // Adiciona o elemento criado na lista da tela
+                listaTela.appendChild(li);
+            });
+        }
+
+        // --- UPDATE (ATUALIZAR) ---
+        function editarUsuario(id) {
+            // Acha o usuário no array
+            const usuario = usuarios.find(u => u.id === id);
+
+            // Pede o novo nome (usando um prompt simples do navegador)
+            const novoNome = prompt("Digite o novo nome:", usuario.nome);
+
+            // Se o usuário digitou algo e não cancelou
+            if (novoNome !== null && novoNome !== "") {
+                usuario.nome = novoNome; // Atualiza o dado
+                renderizarLista();       // Atualiza a tela
+            }
+        }
+
+        // --- DELETE (DELETAR) ---
+        function deletarUsuario(id) {
+            // Confirmar antes de apagar é uma boa prática!
+            if (confirm("Tem certeza que deseja excluir?")) {
+                // Filtra a lista, mantendo apenas quem tem ID diferente do excluído
+                usuarios = usuarios.filter(u => u.id !== id);
+                renderizarLista(); // Atualiza a tela
+            }
+        }
+    </script>
+</body>
+
+</html>
